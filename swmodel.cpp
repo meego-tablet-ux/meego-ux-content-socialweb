@@ -235,7 +235,10 @@ void SwModel::performAction(QString action, QString uniqueid)
     //Right now, assume only default action.
     foreach (struct SwItem item, mItems) {
         if (item.item->getID() == uniqueid) {
-            QDesktopServices::openUrl(item.item->getURL());
+            if (action == "default")
+                QDesktopServices::openUrl(item.item->getURL());
+            else
+                qDebug() << "Unrecognized action" << action << "called!";
             break;
         }
 
