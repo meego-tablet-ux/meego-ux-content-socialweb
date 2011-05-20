@@ -2,7 +2,7 @@
 # libsocialweb plugin for meego-ux-content
 # 
 
-VERSION = 0.1.0
+VERSION = 0.1.1
 TARGET = swplugin
 TEMPLATE = lib
 
