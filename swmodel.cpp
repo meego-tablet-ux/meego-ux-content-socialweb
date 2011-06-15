@@ -28,51 +28,6 @@ SwModel::SwModel(SwClientService *clientService, QObject *parent):
 {
     openView();
 }
-/*
-// Developers: Please see annotations in emailmodel.cpp for help on how to
-//   implement your own feed model. This one is no different.
-SocialModel::SocialModel(QObject *parent): McaFeedModel(parent)
-{
-    m_size = 15;
-    m_socials = new Social[m_size];
-
-    // ensure Socials generated are always the same
-    qsrand(0);
-
-    QDateTime date = QDateTime::currentDateTime();
-    for (int i=0; i<m_size; i++) {
-        date = date.addSecs(-qrand() % 10000);
-        m_socials[i].timestamp = date;
-
-        // use consistent uuids for testing
-        m_socials[i].uuid = QString::number(20000 + i);
-
-        QStringList list;
-        list << "New friend" << "Sarah is listening" <<
-                "Photo album uploaded" << "John likes MeeGo";
-        int msg = qrand() % list.size();
-        m_socials[i].subject = list.at(msg);
-
-        list.clear();
-        list << "Alex has accepted your friend request"
-                <<
-                "Sarah is listening to Beethoven's 5th Symphony"
-                <<
-                "Photos from the last week of my road trip to Paris"
-                <<
-                "Hey guys, check out these cool new MeeGo applications";
-        m_socials[i].body = list.at(msg);
-
-        connect(&m_socials[i].actions, SIGNAL(standardAction(QString,QString)),
-                this, SLOT(performAction(QString,QString)));
-    }
-}
-
-SocialModel::~SocialModel()
-{
-    delete [] m_socials;
-}
-*/
 
 int SwModel::rowCount(const QModelIndex &parent) const
 {
@@ -85,39 +40,7 @@ QVariant SwModel::data(const QModelIndex &index, int role) const
     int row = index.row();
     if ((row >= mItems.count()) || (row < 0))
         return QVariant();
-//    qDebug() << QString("mItems.count(): ") << mItems.count();
-/*
-    switch (role) {
-    case RequiredTypeRole:
-        return QString("content");
 
-    case RequiredUniqueIdRole:
-        return m_socials[row].uuid;
-
-    case RequiredTimestampRole:
-        return m_socials[row].timestamp;
-
-    case GenericTitleRole:
-        return m_socials[row].subject;
-
-    case GenericContentRole:
-        return m_socials[row].body;
-
-    case GenericAvatarUrlRole:
-        if (index.row() % 2)
-            return QString("file://tmp/happy.svg");
-        else
-            return QString("file://tmp/wink.svg");
-
-    case CommonActionsRole:
-        return QVariant::fromValue<McaActions*>(&m_socials[row].actions);
-
-    default:
-        return QVariant();
-    };
-    */
- //   qDebug() << QString("row: %1, mItems.count(): %2").arg(QString::number(row), QString::number(mItems.count()));
-//    qDebug() << QString("mItems.at(row): %1/%2").arg(QString::number((int)(mItems.at(row).item)), QString::number((int)(mItems.at(row).action))) ;
     SwItem item = mItems.at(row);
     SwClientItem *swItem = item.item;
     if (!swItem)
@@ -126,24 +49,6 @@ QVariant SwModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case RequiredTypeRole:
         {
-/*            QString itemType;
-
-            switch (swItem->getItemType()) {
-            case SwClientItem::ItemTypeText:
-                itemType = "text";
-                break;
-            case SwClientItem::ItemTypePic:
-                itemType = "picture";
-                break;
-            case SwClientItem::ItemTypeLast:
-            default:
-                itemType = "unknown";
-                qDebug() << QString("Got unknown item type for SwClientItem of service %1! Props:").arg(swItem->getServiceName());
-                qDebug() << swItem->getSwItemProps();
-                break;
-            }
-
-            return QVariant::fromValue<QString>(QString("%1/%2").arg(itemType, swItem->getServiceName()));*/
             return "content";
             break;
         }
@@ -171,22 +76,6 @@ QVariant SwModel::data(const QModelIndex &index, int role) const
             return QVariant::fromValue<QString>(swItem->getAuthorName());
             break;
         }
-
-//    case GenericIconUrlRole:
-//        {
-//            //TODO: Ugly - need to resolve this in libsocialweb-qt -
-//            //getService gives us a const SwClientService, but the
-//            //SwClientService::getServiceConfig is not const, as it will
-//            //instanciate a SwClientServiceConfig private member object if
-//            //it's not already instanciated...
-//            SwClientService *swService = const_cast<SwClientService *>(swItem->getService());
-
-//            QString path = swService->getServiceConfig()->getIconPath();
-//            if (path.isEmpty())
-//                return QVariant();
-//            return QVariant::fromValue<QString>(QString("file://%1").arg(path));
-//            break;
-//        }
 
     case GenericRelevanceRole:
         {
@@ -231,8 +120,6 @@ QVariant SwModel::data(const QModelIndex &index, int role) const
 
 void SwModel::performAction(QString action, QString uniqueid)
 {
-    qDebug() << "Action" << action << "called for libsocialweb item" << uniqueid;
-    //Right now, assume only default action.
     foreach (struct SwItem item, mItems) {
         if (item.item->getID() == uniqueid) {
             if (action == "default")
@@ -292,7 +179,7 @@ void SwModel::onItemsRemoved(ArrayOfSwItemId items)
             if (itemID.uuid == item.item->getSwUUID()) {
                 this->beginRemoveRows(QModelIndex(), i, i);
                 mItems.removeAt(i);
-                this->endInsertRows();
+                this->endRemoveRows();
                 break;
             }
         }
